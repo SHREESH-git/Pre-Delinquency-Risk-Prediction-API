@@ -16,53 +16,52 @@
 Currently, financial risk engines are computationally heavy due to simultaneous predictions across tree ensembles and sequential deep learning models. This project wraps those models in a high-performance REST API.
 
 ```mermaid
-flowchart TD
+flowchart LR
     %% ===== EXTERNAL TIER =====
-    Client["External Client (Streamlit UI / Bank Servers)"]
+    Client["External Client"]
 
     %% ===== INGRESS & TRAFFIC CONTROL =====
-    subgraph Gateway["Traffic Management & Caching"]
-        Ratelimit["Token-Bucket Rate Limiter (Middleware)"]
+    subgraph Gateway ["Traffic Management"]
+        direction TB
+        Ratelimit["Token-Bucket Limiter"]
         Redis[("Redis In-Memory Cache")]
     end
 
-    %% ===== API ROUTING (FASTAPI) =====
-    subgraph API["FastAPI Application Layer (Async Event Loop)"]
-        A1["POST /predict"]
-        A2["POST /predict-batch"]
-        A3["POST /explain"]
-        Pydantic["Pydantic Data Validation"]
+    %% ===== API ROUTING =====
+    subgraph API ["FastAPI (Async Loop)"]
+        direction TB
+        Router["API Router (/predict)"]
+        Pydantic["Pydantic Validation"]
     end
 
-    %% ===== MULTI-PROCESSING POOL (Bypassing GIL) =====
-    subgraph Workers["ProcessPoolExecutor (CPU-Bound Workers)"]
-        B1["Feature Engineering Pipeline"]
-        B2["Predictor Engine (Hybrid Ensemble)"]
-        B3["Expected Loss Risk Engine"]
+    %% ===== MULTI-PROCESSING POOL =====
+    subgraph Workers ["ProcessPoolExecutor (CPU-Bound)"]
+        direction TB
+        B1["Feature Engineering"]
+        B2["Predictor Engine"]
+        B3["Risk Engine"]
     end
 
-    %% ===== SHARED MEMORY CACHE =====
-    subgraph Memory["Application Memory (Loaded on Startup)"]
-        M1["PyTorch LSTM Weights (.pt)"]
-        M2["Tree Ensemble Weights (.pkl, .cbm)"]
-    end
+    %% ===== SHARED MEMORY =====
+    Memory["Pre-loaded Models (.pt, .pkl)"]
 
     %% ===== DATA FLOW =====
     Client -- "JSON Payload" --> Ratelimit
-    Ratelimit -- "Under Limit" --> API
+    Ratelimit -- "Under Limit" --> Router
     Ratelimit -. "Over Limit" .-> Reject["429 Too Many Requests"]
 
-    API -- "1. Check Cache" --> Redis
-    Redis -. "Cache Hit (O(1) Retrieval)" .-> Client
+    Router -- "1. Check Cache" --> Redis
+    Redis -. "Hit (O(1))" .-> Client
 
-    API -- "2. Cache Miss" --> Pydantic
-    Pydantic -- "Clean Data" --> Workers
+    Router -- "2. Cache Miss" --> Pydantic
+    Pydantic -- "Clean Data" --> B1
     
-    Memory -- "Pre-loaded Models" --> B2
+    B1 --> B2
+    Memory --> B2
+    B2 --> B3
     
-    B1 --> B2 --> B3
     B3 -- "3. Store Result" --> Redis
-    B3 -- "Structured JSON (Risk Bucket, EL)" --> Client
+    B3 -- "Structured JSON" --> Client
 ```
 
 ### Current Implementation (MVP)
