@@ -4,11 +4,12 @@ import pandas as pd
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
+import torch
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel, Field
 from typing import List
 
-# Import your core pipeline logic (copied into the repo)
+
 from model_loader import load_models
 from feature_engineering import engineer_features
 from predictor import prepare_inputs, predict_pd
@@ -204,6 +205,7 @@ def explain_customer(request: CustomerPredictionRequest):
         # Vectorized ensemble wrapper function for SHAP explainer
         def ensemble_predict(X):
             df_X = pd.DataFrame(X, columns=tree_cols).reindex(columns=tree_cols, fill_value=0)
+            df_X = df_X.astype(float)
             n = len(df_X)
             
             # Trees
