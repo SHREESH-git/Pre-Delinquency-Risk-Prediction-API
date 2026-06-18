@@ -1,0 +1,13 @@
+streamlit
+pandas
+numpy
+torch
+xgboost
+lightgbm
+catboost
+shap
+matplotlib
+plotly
+joblib
+scikit-learn
+pillow

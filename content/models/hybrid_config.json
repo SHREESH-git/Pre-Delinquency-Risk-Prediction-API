@@ -1,0 +1,42 @@
+{
+    "model_info": {
+        "model_name": "Hybrid_PreDelinquency_Model",
+        "version": "1.0",
+        "sequence_length": 3,
+        "hidden_size": 64
+    },
+
+    "tree_ensemble": {
+        "blend_method": "weighted_auc",
+        "wx": 0.8421,
+        "wl": 0.8364,
+        "wc": 0.8287
+    },
+
+    "hybrid_blend": {
+        "best_tree_weight": 0.9,
+        "lstm_weight": 0.1
+    },
+
+    "calibration": {
+        "method": "logistic",
+        "pd_floor": 0.01,
+        "pd_cap": 0.95
+    },
+
+    "expected_loss_engine": {
+        "ead_rules": {
+            "emi_multiplier": 6,
+            "utilization_income_multiplier": 2
+        },
+        "lgd_rules": {
+            "base_lgd": 0.35,
+            "salary_delay_add": 0.10,
+            "utilization_add": 0.10
+        }
+    },
+
+    "portfolio_assumption": {
+        "real_world_default_rate": 0.2
+    }
+}

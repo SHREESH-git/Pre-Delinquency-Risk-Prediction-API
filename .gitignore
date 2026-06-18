@@ -1,0 +1,48 @@
+# SYSTEM & IDE
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# DATASETS (Large files ignored)
+notebook/**/*.csv
+raw/
+processed/
+data/
+
+# Allow sample data to be tracked
+!sample_data/
+!sample_data/**/*.csv
+
+# MODELS (Artifacts ignored)
+content/models/*.pkl
+content/models/*.pt
+content/models/*.cbm
+content/models/*.h5
+content/models/*.joblib
+content/models/*.onnx
+content/models/*.txt
+
+# Exception: Keep configuration files tracked
+!content/models/*.json
+
+# SECRETS & CONFIG
+.env
+.env.*
+*.secret
+credentials.json
+client_secrets.json
+
+# GENERATED OUTPUTS
+inspection_output.txt
+catboost_info/
+shap_*.png
+
+venv/
+env/
+.venv/
